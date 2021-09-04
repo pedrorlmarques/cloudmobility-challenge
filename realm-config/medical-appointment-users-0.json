@@ -24,7 +24,8 @@
       "requiredActions": [],
       "realmRoles": ["offline_access", "uma_authorization"],
       "clientRoles": {
-        "account": ["view-profile", "manage-account"]
+        "account": ["view-profile", "manage-account"],
+        "realm-management": ["manage-users", "manage-realm"]
       },
       "notBefore": 0,
       "groups": ["/Admins", "/Users"]
