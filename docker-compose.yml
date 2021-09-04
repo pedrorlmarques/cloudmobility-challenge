@@ -22,6 +22,15 @@ services:
     # If you want to expose these ports outside your dev PC,
     # remove the "127.0.0.1:" prefix
     ports:
-      - 127.0.0.1:9080:9080
-      - 127.0.0.1:9443:9443
-      - 127.0.0.1:10990:10990
+      - "127.0.0.1:9080:9080"
+      - "127.0.0.1:9443:9443"
+      - "127.0.0.1:10990:10990"
+  user-postgresql:
+    image: postgres:12.3
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./user-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
