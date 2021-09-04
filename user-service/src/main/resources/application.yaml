@@ -6,5 +6,13 @@ spring:
     name: user
     username: user
     password: user
+  cloud:
+    function:
+      definition: userEventSupplier
+    stream:
+      bindings:
+        userEventSupplier-out-0:
+          destination: user.events
+
 server:
   port: 8081
