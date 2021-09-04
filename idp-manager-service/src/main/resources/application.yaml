@@ -1,9 +1,14 @@
 spring:
   application:
     name: idp-manager-service
-
-server:
-  port: 8082
+  cloud:
+    function:
+      definition: onUserEvent
+    stream:
+      bindings:
+        onUserEvent-in-0:
+          destination: user.events
+          group: ${spring.application.name}-user-events-handler
 
 keycloak:
   serverUrl: http://localhost:9080/auth
@@ -12,3 +17,6 @@ keycloak:
   clientSecret: internal
   username: admin
   password: admin
+
+server:
+  port: 8082
