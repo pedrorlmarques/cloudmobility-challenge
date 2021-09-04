@@ -47,6 +47,7 @@
     <modules>
         <module>appointment-service</module>
         <module>user-service</module>
+        <module>idp-manager-service</module>
     </modules>
 
 </project>

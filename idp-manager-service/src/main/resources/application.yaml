@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: idp-manager-service
+
+server:
+  port: 8082
+
+keycloak:
+  serverUrl: http://localhost:9080/auth
+  realm: medical-appointment
+  clientId: internal
+  clientSecret: internal
+  username: admin
+  password: admin
