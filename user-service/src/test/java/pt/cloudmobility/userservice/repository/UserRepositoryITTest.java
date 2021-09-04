@@ -27,7 +27,7 @@ class UserRepositoryITTest extends PostgreSQLContainerTestingSupport {
 
         var identificationNumber = "123";
 
-        this.userRepository.save(new User(null, "", "", identificationNumber, InternalRole.DOCTOR)).block();
+        this.userRepository.save(new User(null, "", "", identificationNumber, InternalRole.DOCTOR, "p@gmail.com")).block();
 
         StepVerifier.create(this.userRepository.findByIdentificationNumber(identificationNumber))
                 .expectSubscription()
@@ -40,7 +40,7 @@ class UserRepositoryITTest extends PostgreSQLContainerTestingSupport {
 
         var identificationNumber = "123";
 
-        this.userRepository.save(new User(null, "", "", identificationNumber, InternalRole.DOCTOR)).block();
+        this.userRepository.save(new User(null, "", "", identificationNumber, InternalRole.DOCTOR, "")).block();
 
         StepVerifier.create(this.userRepository.findByIdentificationNumber("124"))
                 .expectSubscription()

@@ -14,16 +14,18 @@ public class User {
     private String lastName;
     private String identificationNumber;
     private InternalRole role;
+    private String email;
 
     public User() {
     }
 
-    public User(Integer id, String firstName, String lastName, String identificationNumber, InternalRole role) {
+    public User(Integer id, String firstName, String lastName, String identificationNumber, InternalRole role, String email) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.identificationNumber = identificationNumber;
         this.role = role;
+        this.email = email;
     }
 
     public Integer getId() {
@@ -66,17 +68,25 @@ public class User {
         this.role = role;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(identificationNumber, user.identificationNumber) && Objects.equals(role, user.role);
+        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(identificationNumber, user.identificationNumber) && role == user.role && Objects.equals(email, user.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, identificationNumber, role);
+        return Objects.hash(id, firstName, lastName, identificationNumber, role, email);
     }
 
     @Override
@@ -86,7 +96,8 @@ public class User {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", identificationNumber='" + identificationNumber + '\'' +
-                ", role='" + role + '\'' +
+                ", role=" + role +
+                ", email='" + email + '\'' +
                 '}';
     }
 }

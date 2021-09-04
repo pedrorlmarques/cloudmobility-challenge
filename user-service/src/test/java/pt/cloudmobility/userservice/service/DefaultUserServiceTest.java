@@ -50,10 +50,11 @@ class DefaultUserServiceTest {
         userToCreate.setLastName("name");
         userToCreate.setRole(InternalRole.DOCTOR);
         userToCreate.setIdentificationNumber("1");
+        userToCreate.setEmail("p@gmail.com");
 
         when(this.userRepository.findByIdentificationNumber(userToCreate.getIdentificationNumber())).thenReturn(Mono.empty());
 
-        var savedUser = new User(1, userToCreate.getFirstName(), userToCreate.getLastName(), userToCreate.getIdentificationNumber(), userToCreate.getRole());
+        var savedUser = new User(1, userToCreate.getFirstName(), userToCreate.getLastName(), userToCreate.getIdentificationNumber(), userToCreate.getRole(), userToCreate.getEmail());
 
         when(this.userRepository.save(any())).thenReturn(Mono.just(savedUser));
 
@@ -79,6 +80,7 @@ class DefaultUserServiceTest {
         userToCreate.setLastName("name");
         userToCreate.setRole(InternalRole.DOCTOR);
         userToCreate.setIdentificationNumber("1");
+        userToCreate.setEmail("p@gmail.com");
 
         var user = new User();
         user.setId(1);

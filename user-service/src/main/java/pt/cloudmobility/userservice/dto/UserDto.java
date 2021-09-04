@@ -11,16 +11,18 @@ public class UserDto {
     private String lastName;
     private String identificationNumber;
     private InternalRole role;
+    private String email;
 
     public UserDto() {
     }
 
-    public UserDto(Integer id, String firstName, String lastName, String identificationNumber, InternalRole role) {
+    public UserDto(Integer id, String firstName, String lastName, String identificationNumber, InternalRole role, String email) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.identificationNumber = identificationNumber;
         this.role = role;
+        this.email = email;
     }
 
     public Integer getId() {
@@ -63,17 +65,25 @@ public class UserDto {
         this.role = role;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserDto userDto = (UserDto) o;
-        return Objects.equals(id, userDto.id) && Objects.equals(firstName, userDto.firstName) && Objects.equals(lastName, userDto.lastName) && Objects.equals(identificationNumber, userDto.identificationNumber) && Objects.equals(role, userDto.role);
+        return Objects.equals(id, userDto.id) && Objects.equals(firstName, userDto.firstName) && Objects.equals(lastName, userDto.lastName) && Objects.equals(identificationNumber, userDto.identificationNumber) && role == userDto.role && Objects.equals(email, userDto.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, identificationNumber, role);
+        return Objects.hash(id, firstName, lastName, identificationNumber, role, email);
     }
 
     @Override
@@ -83,7 +93,8 @@ public class UserDto {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", identificationNumber='" + identificationNumber + '\'' +
-                ", role='" + role + '\'' +
+                ", role=" + role +
+                ", email='" + email + '\'' +
                 '}';
     }
 }
