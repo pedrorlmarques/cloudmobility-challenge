@@ -16,19 +16,23 @@ public final class UserEventFunctionHelper {
         //private constructor
     }
 
-    public static Function<Flux<UserEvent>, Mono<Void>> createDoctorWeekSchedule(ScheduleService scheduleService) {
+    public static Function<Flux<UserEvent>, Mono<Void>> createDoctorWeekSchedule(final ScheduleService scheduleService) {
         return userEventFlux -> userEventFlux
                 .filter(onlyUserCreationEvents())
                 .filter(onlyDoctorAllowed())
-                .flatMap(userEvent -> scheduleService.createDefaultWeekScheduleFor(userEvent.getSubject().getId()))
+                .flatMap(userEvent -> scheduleService
+                        .createDefaultWeekScheduleFor(userEvent.getSubject().getId()))
                 .then();
     }
 
     private static Predicate<UserEvent> onlyDoctorAllowed() {
-        return userEvent -> userEvent.getSubject().getRole().equals(InternalRole.DOCTOR);
+        return userEvent -> userEvent.getSubject() != null &&
+                userEvent.getSubject().getRole() != null &&
+                userEvent.getSubject().getRole().equals(InternalRole.DOCTOR);
     }
 
     private static Predicate<UserEvent> onlyUserCreationEvents() {
-        return userEvent -> userEvent.getEventType().equals(EventType.USER_CREATED);
+        return userEvent -> userEvent.getEventType() != null &&
+                userEvent.getEventType().equals(EventType.USER_CREATED);
     }
 }

@@ -1,8 +1,19 @@
 spring:
   application:
     name: appointment-service
+  cloud:
+    function:
+      definition: onUserEvent
+    stream:
+      bindings:
+        onUserEvent-in-0:
+          destination: user.events
+          group: ${spring.application.name}-user-events-handler
 
 appointment:
   weekdays: 5
   startSlotHour: 9
   endSlotHour: 19
+
+server:
+  port: 8083

@@ -5,6 +5,7 @@ import pt.cloudmobility.appointmentservice.configuration.AppointmentProperties;
 import pt.cloudmobility.appointmentservice.repository.SlotRepository;
 import pt.cloudmobility.appointmentservice.utils.ScheduleUtils;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class DefaultScheduleService implements ScheduleService {
@@ -20,6 +21,7 @@ public class DefaultScheduleService implements ScheduleService {
     @Override
     public Mono<Void> createDefaultWeekScheduleFor(Integer doctorId) {
         return Mono.justOrEmpty(doctorId)
+                .publishOn(Schedulers.single())
                 .flatMapIterable(doctor -> ScheduleUtils
                         .createDefaultWeekScheduleFor(appointmentProperties.getWeekdays(),
                                 appointmentProperties.getStartSlotHour(),
