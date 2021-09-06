@@ -64,6 +64,7 @@ class UserRouterITTest extends PostgreSQLContainerTestingSupport implements Kafk
         userToCreate.setLastName("name");
         userToCreate.setRole(InternalRole.DOCTOR);
         userToCreate.setIdentificationNumber("1");
+        userToCreate.setEmail("pp@gmail.com");
 
         this.webTestClient.post().uri(API_USERS).contentType(APPLICATION_JSON)
                 .body(Mono.just(userToCreate), UserDto.class)
@@ -74,7 +75,7 @@ class UserRouterITTest extends PostgreSQLContainerTestingSupport implements Kafk
         await("verify that the user exists on the database")
                 .untilAsserted(() ->
                         assertThat(this.userRepository
-                                .findByIdentificationNumber(userToCreate.getIdentificationNumber())
+                                .findByEmail(userToCreate.getEmail())
                                 .block())
                                 .isNotNull());
 

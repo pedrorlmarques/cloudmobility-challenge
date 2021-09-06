@@ -52,7 +52,7 @@ class DefaultUserServiceTest {
         userToCreate.setIdentificationNumber("1");
         userToCreate.setEmail("p@gmail.com");
 
-        when(this.userRepository.findByIdentificationNumber(userToCreate.getIdentificationNumber())).thenReturn(Mono.empty());
+        when(this.userRepository.findByEmail(userToCreate.getEmail())).thenReturn(Mono.empty());
 
         var savedUser = new User(1, userToCreate.getFirstName(), userToCreate.getLastName(), userToCreate.getIdentificationNumber(), userToCreate.getRole(), userToCreate.getEmail());
 
@@ -89,7 +89,7 @@ class DefaultUserServiceTest {
         user.setRole(InternalRole.DOCTOR);
         user.setIdentificationNumber("1");
 
-        when(this.userRepository.findByIdentificationNumber(userToCreate.getIdentificationNumber())).thenReturn(Mono.just(user));
+        when(this.userRepository.findByEmail(userToCreate.getEmail())).thenReturn(Mono.just(user));
 
         StepVerifier.create(
                         this.userService.createUser(userToCreate, userCreationCallback))
@@ -99,6 +99,4 @@ class DefaultUserServiceTest {
 
         verify(this.userEventSink, times(0)).emitNext(any(), any());
     }
-
-
 }

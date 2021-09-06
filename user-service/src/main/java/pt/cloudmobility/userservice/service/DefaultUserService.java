@@ -23,8 +23,8 @@ public class DefaultUserService implements UserService {
     @Override
     public Mono<User> createUser(UserDto userDto, Consumer<User> callback) {
         return this.userRepository
-                .findByIdentificationNumber(userDto.getIdentificationNumber())
-                .flatMap(user -> Mono.error(new IllegalStateException("User " + user.getIdentificationNumber() + " already exists")))
+                .findByEmail(userDto.getEmail())
+                .flatMap(user -> Mono.error(new IllegalStateException("User " + user.getEmail() + " already exists")))
                 .switchIfEmpty(Mono.just(userDto)
                         .map(UserMapper.INSTANCE::convertTo)
                         .flatMap(userRepository::save))

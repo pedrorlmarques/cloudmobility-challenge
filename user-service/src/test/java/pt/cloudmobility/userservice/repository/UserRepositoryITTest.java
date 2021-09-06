@@ -25,24 +25,24 @@ class UserRepositoryITTest extends PostgreSQLContainerTestingSupport {
     @Test
     void testGivenIdentificationNumberItShouldReturnUser() {
 
-        var identificationNumber = "123";
+        var email = "p@gmail.com";
 
-        this.userRepository.save(new User(null, "", "", identificationNumber, InternalRole.DOCTOR, "p@gmail.com")).block();
+        this.userRepository.save(new User(null, "", "", "123", InternalRole.DOCTOR, email)).block();
 
-        StepVerifier.create(this.userRepository.findByIdentificationNumber(identificationNumber))
+        StepVerifier.create(this.userRepository.findByEmail(email))
                 .expectSubscription()
-                .assertNext(user -> assertThat(user.getIdentificationNumber()).isNotNull().isEqualTo(identificationNumber))
+                .assertNext(user -> assertThat(user.getEmail()).isNotNull().isEqualTo(email))
                 .verifyComplete();
     }
 
     @Test
     void testGivenNonExistingIdentificationNumberItShouldReturnEmpty() {
 
-        var identificationNumber = "123";
+        var email = "p@gmail.com";
 
-        this.userRepository.save(new User(null, "", "", identificationNumber, InternalRole.DOCTOR, "")).block();
+        this.userRepository.save(new User(null, "", "", "", InternalRole.DOCTOR, "p21@gmail.com")).block();
 
-        StepVerifier.create(this.userRepository.findByIdentificationNumber("124"))
+        StepVerifier.create(this.userRepository.findByEmail(email))
                 .expectSubscription()
                 .verifyComplete();
     }
