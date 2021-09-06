@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: appointment-service
+
+appointment:
+  weekdays: 5
+  startSlotHour: 9
+  endSlotHour: 19
