@@ -79,18 +79,18 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
 
         var atNineAM = LocalDate.now().atTime(9, 0);
 
-        Flux.just(new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM, atNineAM.plusHours(1)), // 9 - 10
-                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(1), atNineAM.plusHours(2)), // 10 - 11
-                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(2), atNineAM.plusHours(3)),  // 11 - 12
+        Flux.just(new Slot(null, doctorId, null, SlotStatus.OPEN, atNineAM, atNineAM.plusHours(1)), // 9 - 10
+                        new Slot(null, doctorId, null, SlotStatus.OPEN, atNineAM.plusHours(1), atNineAM.plusHours(2)), // 10 - 11
+                        new Slot(null, doctorId, null, SlotStatus.OPEN, atNineAM.plusHours(2), atNineAM.plusHours(3)),  // 11 - 12
                         new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(3), atNineAM.plusHours(4)), // 12 - 13
                         new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(4), atNineAM.plusHours(5))) // 13 - 14
                 .concatMap(this.slotRepository::save)
                 .blockLast();
 
-        Flux.just(new Slot(null, doctorId2, null, SlotStatus.BOOKED, atNineAM, atNineAM.plusHours(1)), // 9 - 10
-                        new Slot(null, doctorId2, null, SlotStatus.BOOKED, atNineAM.plusHours(1), atNineAM.plusHours(2)), // 10 - 11
-                        new Slot(null, doctorId2, null, SlotStatus.BOOKED, atNineAM.plusHours(2), atNineAM.plusHours(3)),  // 11 - 12
-                        new Slot(null, doctorId2, null, SlotStatus.BOOKED, atNineAM.plusHours(3), atNineAM.plusHours(4)), // 12 - 13
+        Flux.just(new Slot(null, doctorId2, null, SlotStatus.OPEN, atNineAM, atNineAM.plusHours(1)), // 9 - 10
+                        new Slot(null, doctorId2, null, SlotStatus.OPEN, atNineAM.plusHours(1), atNineAM.plusHours(2)), // 10 - 11
+                        new Slot(null, doctorId2, null, SlotStatus.OPEN, atNineAM.plusHours(2), atNineAM.plusHours(3)),  // 11 - 12
+                        new Slot(null, doctorId2, null, SlotStatus.OPEN, atNineAM.plusHours(3), atNineAM.plusHours(4)), // 12 - 13
                         new Slot(null, doctorId2, null, SlotStatus.BOOKED, atNineAM.plusHours(4), atNineAM.plusHours(5))) // 13 - 14
                 .concatMap(this.slotRepository::save)
                 .blockLast();
@@ -143,7 +143,7 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
         var userId = 1;
         var now = LocalDateTime.now();
 
-        var slot = Mono.just(new Slot(null, doctorId, null, SlotStatus.BOOKED, now, now.plusHours(1)))
+        var slot = Mono.just(new Slot(null, doctorId, null, SlotStatus.OPEN, now, now.plusHours(1)))
                 .flatMap(this.slotRepository::save)
                 .block();
 
