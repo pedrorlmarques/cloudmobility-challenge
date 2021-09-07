@@ -9,12 +9,19 @@ spring:
         onUserEvent-in-0:
           destination: user.events
           group: ${spring.application.name}-user-events-handler
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: http://DO_NOT_CALL:9080/auth/realms/medical-appointment
+  main:
+    allow-bean-definition-overriding: true
 
 appointment:
   weekdays: 5
   startSlotHour: 9
   endSlotHour: 19
-
 
 #reduce logging on tests
 logging:

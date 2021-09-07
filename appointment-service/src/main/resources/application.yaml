@@ -14,6 +14,16 @@ spring:
       database: appointmentdb
       username: appointmentUser
       password: Pa$$w0rd123
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: http://localhost:9080/auth/realms/medical-appointment
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: internal
 
 appointment:
   weekdays: 5
@@ -22,4 +32,3 @@ appointment:
 
 server:
   port: 8083
-
