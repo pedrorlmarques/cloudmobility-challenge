@@ -2,6 +2,8 @@ package pt.cloudmobility.appointmentservice.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import pt.cloudmobility.appointmentservice.AppointmentServiceApplication;
@@ -159,6 +161,72 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
             assertThat(reservedSlot).isNotNull();
             assertThat(reservedSlot.getUserId()).isNotNull().isEqualTo(userId);
             assertThat(reservedSlot.getStatus()).isNotNull().isEqualTo(SlotStatus.BOOKED);
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"UNAVAILABLE", "BOOKED"})
+    void testGivenAnUnavailableSlotItShouldSendError(String slotStatus) {
+
+        var doctorId = 1;
+        var userId = 1;
+        var now = LocalDateTime.now();
+
+        var slot = Mono.just(new Slot(null, doctorId, null, SlotStatus.valueOf(slotStatus), now, now.plusHours(1)))
+                .flatMap(this.slotRepository::save)
+                .block();
+
+        //verify response
+        StepVerifier.create(this.defaultScheduleService.reserveSlot(slot.getId(), userId))
+                .expectSubscription()
+                .expectErrorMessage("Slot is unavailable")
+                .verify();
+
+    }
+
+    @Test
+    void testGivenUnexistingSlotItShouldReceiveException() {
+
+        //verify response
+        StepVerifier.create(this.defaultScheduleService.reserveSlot("123", 1))
+                .expectSubscription()
+                .expectError(IllegalAccessException.class)
+                .verify();
+
+    }
+
+    @Test
+    void testGivenStartTimeAndEndTimeITShouldMarkSlotsAsUnavailable() {
+
+        var doctorId = 1;
+        var atNineAM = LocalDate.now().atTime(9, 0);
+
+        Flux.just(new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM, atNineAM.plusHours(1)), // 9 - 10
+                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(1), atNineAM.plusHours(2)), // 10 - 11
+                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(2), atNineAM.plusHours(3)),  // 11 - 12
+                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(3), atNineAM.plusHours(4)), // 12 - 13
+                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(4), atNineAM.plusHours(5))) // 13 - 14
+                .concatMap(this.slotRepository::save)
+                .blockLast();
+
+        StepVerifier.create(this.defaultScheduleService.blockSlots(doctorId, atNineAM, atNineAM.plusHours(2)))
+                .expectSubscription()
+                .verifyComplete();
+
+        await("verify that the block slots are blocked").untilAsserted(() -> {
+            var block = this.slotRepository.findAllByDoctorIdAndStatus(doctorId, SlotStatus.UNAVAILABLE).collectList().block();
+            assertThat(block).isNotNull().hasSize(3);
+            assertThat(block).extracting(Slot::getStatus).allSatisfy(status -> assertThat(status).isEqualTo(SlotStatus.UNAVAILABLE));
+            assertThat(block).extracting(Slot::getStartTime).isNotNull().containsExactlyInAnyOrder(atNineAM, atNineAM.plusHours(1), atNineAM.plusHours(2));
+            assertThat(block).extracting(Slot::getEndTime).isNotNull().containsExactlyInAnyOrder(atNineAM.plusHours(1), atNineAM.plusHours(2), atNineAM.plusHours(3));
+        });
+
+        await("verify that the booked slots aren't changed").untilAsserted(() -> {
+            var block = this.slotRepository.findAllByDoctorIdAndStatus(doctorId, SlotStatus.BOOKED).collectList().block();
+            assertThat(block).isNotNull().hasSize(2);
+            assertThat(block).extracting(Slot::getStatus).allSatisfy(status -> assertThat(status).isEqualTo(SlotStatus.BOOKED));
+            assertThat(block).extracting(Slot::getStartTime).isNotNull().containsExactlyInAnyOrder(atNineAM.plusHours(3), atNineAM.plusHours(4));
+            assertThat(block).extracting(Slot::getEndTime).isNotNull().containsExactlyInAnyOrder(atNineAM.plusHours(4), atNineAM.plusHours(5));
         });
     }
 }

@@ -19,4 +19,7 @@ public interface SlotRepository extends ReactiveMongoRepository<Slot, String> {
     @Query(value = "{'startTime' : { $gte: ?0, $lte: ?1 }, 'status' : ?2, 'doctorId' : ?3 }")
     Flux<Slot> findAllByDoctorIdAndStatusAndStartTimeIsBetween(LocalDateTime startTime, LocalDateTime endTime, SlotStatus slotStatus, Integer doctorId);
 
+    @Query(value = "{'startTime' : { $gte: ?0, $lte: ?1 }, 'doctorId' : ?2 }")
+    Flux<Slot> findAllByDoctorIdAndStartTimeIsBetween(LocalDateTime startTime, LocalDateTime endTime, Integer doctorId);
+
 }

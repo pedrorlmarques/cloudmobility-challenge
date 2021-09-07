@@ -66,15 +66,32 @@ public class DefaultScheduleService implements ScheduleService {
         return Mono.justOrEmpty(slotId)
                 .flatMap(this.slotRepository::findById)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("Slot doesn't exist")))
-                .flatMap(reserveSlotFor(userId))
+                .flatMap(verifyIfSlotIsAvailable())
+                .flatMap(slot -> updateSlot(userId, slot, SlotStatus.BOOKED))
                 .map(SlotMapper.INSTANCE::convertTo);
     }
 
-    private Function<Slot, Mono<Slot>> reserveSlotFor(Integer userId) {
+    private Function<Slot, Mono<? extends Slot>> verifyIfSlotIsAvailable() {
         return slot -> {
-            slot.setUserId(userId);
-            slot.setStatus(SlotStatus.BOOKED);
-            return this.slotRepository.save(slot);
+            if (!slot.getStatus().equals(SlotStatus.OPEN)) {
+                return Mono.error(new IllegalAccessException("Slot is unavailable"));
+            } else {
+                return Mono.justOrEmpty(slot);
+            }
         };
+    }
+
+    @Override
+    public Mono<Void> blockSlots(Integer doctorId, LocalDateTime startDate, LocalDateTime endDate) {
+        return Mono.justOrEmpty(doctorId)
+                .flatMapMany(id -> this.slotRepository.findAllByDoctorIdAndStartTimeIsBetween(startDate, endDate, doctorId))
+                .flatMap(slot -> updateSlot(null, slot, SlotStatus.UNAVAILABLE))
+                .then();
+    }
+
+    private Mono<Slot> updateSlot(Integer userId, Slot slot, SlotStatus booked) {
+        slot.setUserId(userId);
+        slot.setStatus(booked);
+        return this.slotRepository.save(slot);
     }
 }
