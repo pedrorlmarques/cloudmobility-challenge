@@ -1,5 +1,6 @@
 package pt.cloudmobility.appointmentservice.repository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -15,6 +16,11 @@ class SlotRepositoryTest {
 
     @Autowired
     private SlotRepository slotRepository;
+
+    @AfterEach
+    void deleteDatabase() {
+        this.slotRepository.deleteAll().block();
+    }
 
     @Test
     void testAllBookedSlotsInBetween() {
