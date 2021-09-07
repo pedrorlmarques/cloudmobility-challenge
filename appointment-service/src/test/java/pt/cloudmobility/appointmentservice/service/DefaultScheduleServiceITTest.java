@@ -10,6 +10,7 @@ import pt.cloudmobility.appointmentservice.domain.Slot;
 import pt.cloudmobility.appointmentservice.domain.SlotStatus;
 import pt.cloudmobility.appointmentservice.repository.SlotRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(classes = AppointmentServiceApplication.class)
 class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
@@ -132,4 +134,31 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
                 });
     }
 
+    @Test
+    void testGivenSlotIdItShouldReserveForUserId() {
+
+        var doctorId = 1;
+        var userId = 1;
+        var now = LocalDateTime.now();
+
+        var slot = Mono.just(new Slot(null, doctorId, null, SlotStatus.BOOKED, now, now.plusHours(1)))
+                .flatMap(this.slotRepository::save)
+                .block();
+
+        //verify response
+        StepVerifier.create(this.defaultScheduleService.reserveSlot(slot.getId(), userId))
+                .expectSubscription()
+                .assertNext(reservedSlot -> {
+                    assertThat(reservedSlot.getUserId()).isNotNull().isEqualTo(userId);
+                    assertThat(reservedSlot.getStatus()).isNotNull().isEqualTo(SlotStatus.BOOKED);
+                })
+                .verifyComplete();
+
+        await("verify reserved slot on the database").untilAsserted(() -> {
+            var reservedSlot = this.slotRepository.findById(slot.getId()).block();
+            assertThat(reservedSlot).isNotNull();
+            assertThat(reservedSlot.getUserId()).isNotNull().isEqualTo(userId);
+            assertThat(reservedSlot.getStatus()).isNotNull().isEqualTo(SlotStatus.BOOKED);
+        });
+    }
 }
