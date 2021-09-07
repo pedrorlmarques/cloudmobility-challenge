@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public final class SecurityUtils {
 
     public static final String PREFERRED_USERNAME = "preferred_username";
+    public static final String USER_ID = "userId";
 
     private SecurityUtils() {
         //private constructor
@@ -29,6 +30,27 @@ public final class SecurityUtils {
                 .getContext()
                 .map(SecurityContext::getAuthentication)
                 .flatMap(authentication -> Mono.justOrEmpty(extractPrincipal(authentication)));
+    }
+
+    public static Mono<String> getUserId() {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(authentication -> Mono.justOrEmpty(extractUserId(authentication)));
+    }
+
+    private static String extractUserId(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        } else if (authentication instanceof JwtAuthenticationToken) {
+            return (String) ((JwtAuthenticationToken) authentication).getToken().getClaims().get(USER_ID);
+        } else if (authentication.getPrincipal() instanceof DefaultOidcUser) {
+            Map<String, Object> attributes = ((DefaultOidcUser) authentication.getPrincipal()).getAttributes();
+            if (attributes.containsKey(USER_ID)) {
+                return (String) attributes.get(USER_ID);
+            }
+        }
+        return null;
     }
 
     private static String extractPrincipal(Authentication authentication) {
