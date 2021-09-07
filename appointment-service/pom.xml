@@ -109,6 +109,12 @@
             <version>0.4.3</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.pedrorlmarques</groupId>
+            <artifactId>spring-security-withJwtToken-test</artifactId>
+            <version>1.0.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
