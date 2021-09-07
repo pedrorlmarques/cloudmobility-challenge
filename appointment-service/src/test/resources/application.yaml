@@ -26,6 +26,5 @@ appointment:
 #reduce logging on tests
 logging:
   level:
-    org.springframework.boot.autoconfigure.mongo.embedded: error
     org.mongodb: error
     org.apache.kafka: error

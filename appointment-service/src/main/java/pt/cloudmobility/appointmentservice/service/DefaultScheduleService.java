@@ -1,6 +1,7 @@
 package pt.cloudmobility.appointmentservice.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pt.cloudmobility.appointmentservice.configuration.AppointmentProperties;
 import pt.cloudmobility.appointmentservice.domain.Slot;
 import pt.cloudmobility.appointmentservice.domain.SlotStatus;
@@ -61,14 +62,15 @@ public class DefaultScheduleService implements ScheduleService {
                 .map(SlotMapper.INSTANCE::convertTo);
     }
 
+    @Transactional
     @Override
-    public Mono<SlotDto> reserveSlot(String slotId, Integer userId) {
+    public Mono<Void> reserveSlot(String slotId, Integer userId) {
         return Mono.justOrEmpty(slotId)
                 .flatMap(this.slotRepository::findById)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("Slot doesn't exist")))
                 .flatMap(verifyIfSlotIsAvailable())
                 .flatMap(slot -> updateSlot(userId, slot, SlotStatus.BOOKED))
-                .map(SlotMapper.INSTANCE::convertTo);
+                .then();
     }
 
     private Function<Slot, Mono<? extends Slot>> verifyIfSlotIsAvailable() {
@@ -81,6 +83,7 @@ public class DefaultScheduleService implements ScheduleService {
         };
     }
 
+    @Transactional
     @Override
     public Mono<Void> blockSlots(Integer doctorId, LocalDateTime startDate, LocalDateTime endDate) {
         return Mono.justOrEmpty(doctorId)

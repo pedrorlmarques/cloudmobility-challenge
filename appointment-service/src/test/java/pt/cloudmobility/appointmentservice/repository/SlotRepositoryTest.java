@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import pt.cloudmobility.appointmentservice.MongoDBContainerTestingSupport;
 import pt.cloudmobility.appointmentservice.domain.Slot;
 import pt.cloudmobility.appointmentservice.domain.SlotStatus;
 import reactor.core.publisher.Flux;
@@ -12,7 +13,7 @@ import reactor.test.StepVerifier;
 import java.time.LocalDate;
 
 @DataMongoTest
-class SlotRepositoryTest {
+class SlotRepositoryTest implements MongoDBContainerTestingSupport {
 
     @Autowired
     private SlotRepository slotRepository;

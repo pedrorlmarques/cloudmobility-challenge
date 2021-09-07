@@ -16,7 +16,7 @@ public interface ScheduleService {
 
     Flux<SlotDto> fetchAppointments(Integer doctorId, LocalDateTime startDate, LocalDateTime endDate);
 
-    Mono<SlotDto> reserveSlot(String slotId, Integer userId);
+    Mono<Void> reserveSlot(String slotId, Integer userId);
 
     Mono<Void> blockSlots(Integer doctorId, LocalDateTime startDate, LocalDateTime endDate);
 }

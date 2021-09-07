@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import pt.cloudmobility.appointmentservice.AppointmentServiceApplication;
 import pt.cloudmobility.appointmentservice.KafkaContainerTestingSupport;
+import pt.cloudmobility.appointmentservice.MongoDBContainerTestingSupport;
+import pt.cloudmobility.appointmentservice.configuration.TestSecurityConfiguration;
 import pt.cloudmobility.appointmentservice.dto.EventType;
 import pt.cloudmobility.appointmentservice.dto.InternalRole;
 import pt.cloudmobility.appointmentservice.dto.UserDto;
@@ -24,8 +26,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@SpringBootTest(classes = AppointmentServiceApplication.class)
-class UserEventConsumerConfigurationITTest implements KafkaContainerTestingSupport {
+@SpringBootTest(classes = {AppointmentServiceApplication.class, TestSecurityConfiguration.class})
+class UserEventConsumerConfigurationITTest implements KafkaContainerTestingSupport, MongoDBContainerTestingSupport {
 
     @Autowired
     private ObjectMapper objectMapper;

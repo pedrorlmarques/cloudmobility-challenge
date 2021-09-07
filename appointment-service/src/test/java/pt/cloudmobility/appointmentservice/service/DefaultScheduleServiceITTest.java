@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import pt.cloudmobility.appointmentservice.AppointmentServiceApplication;
 import pt.cloudmobility.appointmentservice.KafkaContainerTestingSupport;
+import pt.cloudmobility.appointmentservice.MongoDBContainerTestingSupport;
+import pt.cloudmobility.appointmentservice.configuration.TestSecurityConfiguration;
 import pt.cloudmobility.appointmentservice.domain.Slot;
 import pt.cloudmobility.appointmentservice.domain.SlotStatus;
 import pt.cloudmobility.appointmentservice.repository.SlotRepository;
@@ -22,14 +24,15 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@SpringBootTest(classes = AppointmentServiceApplication.class)
-class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
+@SpringBootTest(classes = {AppointmentServiceApplication.class, TestSecurityConfiguration.class})
+class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport, MongoDBContainerTestingSupport {
 
     @Autowired
     private DefaultScheduleService defaultScheduleService;
 
     @Autowired
     private SlotRepository slotRepository;
+
 
     @AfterEach
     void deleteDatabase() {
@@ -150,10 +153,6 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
         //verify response
         StepVerifier.create(this.defaultScheduleService.reserveSlot(slot.getId(), userId))
                 .expectSubscription()
-                .assertNext(reservedSlot -> {
-                    assertThat(reservedSlot.getUserId()).isNotNull().isEqualTo(userId);
-                    assertThat(reservedSlot.getStatus()).isNotNull().isEqualTo(SlotStatus.BOOKED);
-                })
                 .verifyComplete();
 
         await("verify reserved slot on the database").untilAsserted(() -> {
