@@ -11,6 +11,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.LocalDateTime;
+
 @Service
 public class DefaultScheduleService implements ScheduleService {
 
@@ -46,6 +48,14 @@ public class DefaultScheduleService implements ScheduleService {
     public Flux<SlotDto> fetchDoctorsAvailability() {
         return this.slotRepository
                 .findAllByStatus(SlotStatus.OPEN)
+                .map(SlotMapper.INSTANCE::convertTo);
+    }
+
+    @Override
+    public Flux<SlotDto> fetchAppointments(Integer doctorId, LocalDateTime startDate, LocalDateTime endDate) {
+        return Mono.justOrEmpty(doctorId)
+                .flatMapMany(id -> this.slotRepository
+                        .findAllByDoctorIdAndStatusAndStartTimeIsBetween(startDate, endDate, SlotStatus.BOOKED, id))
                 .map(SlotMapper.INSTANCE::convertTo);
     }
 }
