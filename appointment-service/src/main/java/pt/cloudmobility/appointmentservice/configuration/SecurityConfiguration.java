@@ -58,6 +58,8 @@ public class SecurityConfiguration {
                 .requestCache(NoOpServerRequestCache.getInstance())
                 .and()
                 .authorizeExchange()
+                .pathMatchers("/api/patients/**").hasAuthority(AuthoritiesConstants.USER)
+                .pathMatchers("/api/doctors/**").hasAuthority(AuthoritiesConstants.DOCTOR)
                 .pathMatchers("/api/**").authenticated()
                 .pathMatchers("/actuator/health").permitAll()
                 .pathMatchers("/actuator/info").permitAll()
