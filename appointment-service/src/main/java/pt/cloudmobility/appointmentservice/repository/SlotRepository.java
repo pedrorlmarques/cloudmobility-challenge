@@ -10,4 +10,6 @@ public interface SlotRepository extends ReactiveMongoRepository<Slot, String> {
     Flux<Slot> findAllByDoctorId(Integer doctorId);
 
     Flux<Slot> findAllByDoctorIdAndStatus(Integer doctorId, SlotStatus status);
+
+    Flux<Slot> findAllByStatus(SlotStatus status);
 }

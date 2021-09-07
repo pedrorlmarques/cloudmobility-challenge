@@ -13,6 +13,9 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = AppointmentServiceApplication.class)
 class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
@@ -22,7 +25,6 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
 
     @Autowired
     private SlotRepository slotRepository;
-
 
     @AfterEach
     void deleteDatabase() {
@@ -61,6 +63,40 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport {
                 .expectSubscription()
                 .expectNextCount(3)
                 .verifyComplete();
+    }
+
+    @Test
+    void testFetchAllDoctorsAvailability() {
+        //setupData
+        var doctorId = 1;
+        var doctorId2 = 2;
+
+        Flux.just(new Slot(null, doctorId, null, SlotStatus.OPEN, LocalDateTime.now(), LocalDateTime.now().plusHours(1)),
+                        new Slot(null, doctorId, null, SlotStatus.OPEN, LocalDateTime.now(), LocalDateTime.now().plusHours(2)),
+                        new Slot(null, doctorId, null, SlotStatus.BOOKED, LocalDateTime.now(), LocalDateTime.now().plusHours(3)),
+                        new Slot(null, doctorId, null, SlotStatus.UNAVAILABLE, LocalDateTime.now(), LocalDateTime.now().plusHours(4)),
+                        new Slot(null, doctorId, null, SlotStatus.OPEN, LocalDateTime.now(), LocalDateTime.now().plusHours(5)))
+                .flatMap(this.slotRepository::save)
+                .blockLast();
+
+        Flux.just(new Slot(null, doctorId2, null, SlotStatus.OPEN, LocalDateTime.now(), LocalDateTime.now().plusHours(1)),
+                        new Slot(null, doctorId2, null, SlotStatus.OPEN, LocalDateTime.now(), LocalDateTime.now().plusHours(2)),
+                        new Slot(null, doctorId2, null, SlotStatus.BOOKED, LocalDateTime.now(), LocalDateTime.now().plusHours(3)),
+                        new Slot(null, doctorId2, null, SlotStatus.UNAVAILABLE, LocalDateTime.now(), LocalDateTime.now().plusHours(4)),
+                        new Slot(null, doctorId2, null, SlotStatus.OPEN, LocalDateTime.now(), LocalDateTime.now().plusHours(5)),
+                        new Slot(null, doctorId2, null, SlotStatus.OPEN, LocalDateTime.now(), LocalDateTime.now().plusHours(6)))
+                .flatMap(this.slotRepository::save)
+                .blockLast();
+
+        var doctorsAvailability = this.defaultScheduleService.fetchDoctorsAvailability().collectList().block();
+
+        assertThat(doctorsAvailability).isNotNull();
+
+        assertThat(doctorsAvailability.stream().filter(slotDto -> slotDto.getDoctorId().equals(doctorId)).collect(Collectors.toList()))
+                .hasSize(3);
+
+        assertThat(doctorsAvailability.stream().filter(slotDto -> slotDto.getDoctorId().equals(doctorId2)).collect(Collectors.toList()))
+                .hasSize(4);
     }
 
 

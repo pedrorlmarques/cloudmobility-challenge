@@ -41,4 +41,11 @@ public class DefaultScheduleService implements ScheduleService {
                         .findAllByDoctorIdAndStatus(id, SlotStatus.OPEN))
                 .map(SlotMapper.INSTANCE::convertTo);
     }
+
+    @Override
+    public Flux<SlotDto> fetchDoctorsAvailability() {
+        return this.slotRepository
+                .findAllByStatus(SlotStatus.OPEN)
+                .map(SlotMapper.INSTANCE::convertTo);
+    }
 }

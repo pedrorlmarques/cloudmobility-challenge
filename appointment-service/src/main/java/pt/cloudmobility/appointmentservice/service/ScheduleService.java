@@ -9,4 +9,6 @@ public interface ScheduleService {
     Mono<Void> createDefaultWeekScheduleFor(Integer doctorId);
 
     Flux<SlotDto> fetchDoctorAvailability(Integer doctorId);
+
+    Flux<SlotDto> fetchDoctorsAvailability();
 }
