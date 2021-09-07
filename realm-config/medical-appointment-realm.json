@@ -693,6 +693,21 @@
             "claim.name": "clientHost",
             "jsonType.label": "String"
           }
+        },
+        {
+          "id": "bf881c63-16f2-48f4-bb6a-3b12164bdf60",
+          "name": "userId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "userId",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "userId",
+            "jsonType.label": "String"
+          }
         }
       ],
       "defaultClientScopes": ["web-origins", "role_list", "profile", "roles", "email"],
