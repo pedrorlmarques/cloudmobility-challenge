@@ -11,9 +11,7 @@ spring:
           group: ${spring.application.name}-user-events-handler
   data:
     mongodb:
-      database: appointmentdb
-      username: appointmentUser
-      password: Pa$$w0rd123
+      uri: mongodb://localhost,mongo2/test?replicaSet=appointmentrs
   security:
     oauth2:
       client:
