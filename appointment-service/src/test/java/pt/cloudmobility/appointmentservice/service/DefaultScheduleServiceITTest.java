@@ -213,7 +213,7 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport, Mong
                 .verifyComplete();
 
         await("verify that the block slots are blocked").untilAsserted(() -> {
-            var block = this.slotRepository.findAllByDoctorIdAndStatus(doctorId, SlotStatus.UNAVAILABLE).collectList().block();
+            var block = this.slotRepository.findAllByDoctorIdAndStatusOrderByStartTimeAsc(doctorId, SlotStatus.UNAVAILABLE).collectList().block();
             assertThat(block).isNotNull().hasSize(3);
             assertThat(block).extracting(Slot::getStatus).allSatisfy(status -> assertThat(status).isEqualTo(SlotStatus.UNAVAILABLE));
             assertThat(block).extracting(Slot::getStartTime).isNotNull().containsExactlyInAnyOrder(atNineAM, atNineAM.plusHours(1), atNineAM.plusHours(2));
@@ -221,7 +221,7 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport, Mong
         });
 
         await("verify that the booked slots aren't changed").untilAsserted(() -> {
-            var block = this.slotRepository.findAllByDoctorIdAndStatus(doctorId, SlotStatus.BOOKED).collectList().block();
+            var block = this.slotRepository.findAllByDoctorIdAndStatusOrderByStartTimeAsc(doctorId, SlotStatus.BOOKED).collectList().block();
             assertThat(block).isNotNull().hasSize(2);
             assertThat(block).extracting(Slot::getStatus).allSatisfy(status -> assertThat(status).isEqualTo(SlotStatus.BOOKED));
             assertThat(block).extracting(Slot::getStartTime).isNotNull().containsExactlyInAnyOrder(atNineAM.plusHours(3), atNineAM.plusHours(4));

@@ -12,9 +12,9 @@ public interface SlotRepository extends ReactiveMongoRepository<Slot, String> {
 
     Flux<Slot> findAllByDoctorId(Integer doctorId);
 
-    Flux<Slot> findAllByDoctorIdAndStatus(Integer doctorId, SlotStatus status);
+    Flux<Slot> findAllByDoctorIdAndStatusOrderByStartTimeAsc(Integer doctorId, SlotStatus status);
 
-    Flux<Slot> findAllByStatus(SlotStatus status);
+    Flux<Slot> findAllByStatusOrderByStartTimeAsc(SlotStatus status);
 
     @Query(value = "{'startTime' : { $gte: ?0, $lte: ?1 }, 'status' : ?2, 'doctorId' : ?3 }")
     Flux<Slot> findAllByDoctorIdAndStatusAndStartTimeIsBetween(LocalDateTime startTime, LocalDateTime endTime, SlotStatus slotStatus, Integer doctorId);

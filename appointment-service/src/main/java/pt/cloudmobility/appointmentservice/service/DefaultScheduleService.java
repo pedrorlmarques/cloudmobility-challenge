@@ -43,14 +43,14 @@ public class DefaultScheduleService implements ScheduleService {
     public Flux<SlotDto> fetchDoctorAvailability(Integer doctorId) {
         return Mono.justOrEmpty(doctorId)
                 .flatMapMany(id -> this.slotRepository
-                        .findAllByDoctorIdAndStatus(id, SlotStatus.OPEN))
+                        .findAllByDoctorIdAndStatusOrderByStartTimeAsc(id, SlotStatus.OPEN))
                 .map(SlotMapper.INSTANCE::convertTo);
     }
 
     @Override
     public Flux<SlotDto> fetchDoctorsAvailability() {
         return this.slotRepository
-                .findAllByStatus(SlotStatus.OPEN)
+                .findAllByStatusOrderByStartTimeAsc(SlotStatus.OPEN)
                 .map(SlotMapper.INSTANCE::convertTo);
     }
 
