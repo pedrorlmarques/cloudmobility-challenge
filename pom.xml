@@ -24,6 +24,7 @@
         <spring-cloud.version>2020.0.3</spring-cloud.version>
         <testcontainers.version>1.15.3</testcontainers.version>
         <jib-maven-plugin.version>3.1.4</jib-maven-plugin.version>
+        <springdoc-openapi.version>1.5.10</springdoc-openapi.version>
     </properties>
 
     <repositories>

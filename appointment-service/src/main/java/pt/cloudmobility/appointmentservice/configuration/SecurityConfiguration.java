@@ -48,7 +48,7 @@ public class SecurityConfiguration {
         // @formatter:off
         http
                 .securityMatcher(new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(
-                        pathMatchers("/test/**"),
+                        pathMatchers("/swagger-ui.html/**", "/configuration/**", "/swagger-resources/**", "/v2/api-docs", "/webjars/**", "/test/**", "/v3/api-docs/**"),
                         pathMatchers(HttpMethod.OPTIONS, "/**")
                 )))
                 .csrf()
