@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @WithMockJwtToken(subject = "", authorities = {"ROLE_USER"},
         additionalClaims = {
@@ -34,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureWebTestClient
 @SpringBootTest(classes = {AppointmentServiceApplication.class, TestSecurityConfiguration.class})
 class PatientsRouterConfigurationITTest implements MongoDBContainerTestingSupport, KafkaContainerTestingSupport {
-
 
     public static final String API_PATIENTS = "/api/patients";
 
@@ -47,12 +47,43 @@ class PatientsRouterConfigurationITTest implements MongoDBContainerTestingSuppor
     @Autowired
     private ObjectMapper objectMapper;
 
-
     @AfterEach
     void deleteDatabase() {
         this.slotRepository.deleteAll().block();
     }
 
+    @Test
+    void testGivenAppointmentIdItShouldMarkBooked() {
+
+        var doctorId = 1;
+        var atNineAM = LocalDate.now().atTime(9, 0);
+
+        //setup Data for both doctors
+        var slot = Flux.just(new Slot(null, doctorId, null, SlotStatus.OPEN, atNineAM, atNineAM.plusHours(1)), // 9 - 10
+                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(1), atNineAM.plusHours(2)), // 10 - 11
+                        new Slot(null, doctorId, null, SlotStatus.BOOKED, atNineAM.plusHours(2), atNineAM.plusHours(3)),  // 11 - 12
+                        new Slot(null, doctorId, null, SlotStatus.OPEN, atNineAM.plusHours(3), atNineAM.plusHours(4)), // 12 - 13
+                        new Slot(null, doctorId, null, SlotStatus.OPEN, atNineAM.plusHours(4), atNineAM.plusHours(5))) // 13 - 14
+                .concatMap(this.slotRepository::save)
+                .blockLast();
+
+        //reserve the last slot
+        this.webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path(API_PATIENTS + "/appointments/{appointmentId}")
+                        .build(slot.getId()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+
+        await().untilAsserted(() -> {
+            var bookedSlot = this.slotRepository.findById(slot.getId()).block();
+            assertThat(bookedSlot).isNotNull();
+            assertThat(bookedSlot.getStatus()).isNotNull().isEqualTo(SlotStatus.BOOKED);
+            assertThat(bookedSlot.getUserId()).isNotNull().isEqualTo(2);
+        });
+    }
 
     @Test
     void testFetchAllDoctorsOpenAppointments() throws Exception {
@@ -96,5 +127,4 @@ class PatientsRouterConfigurationITTest implements MongoDBContainerTestingSuppor
         assertThat(slots).extracting(SlotDto::getEndTime).containsOnly(atNineAM.plusHours(1), atNineAM.plusHours(4));
 
     }
-
 }

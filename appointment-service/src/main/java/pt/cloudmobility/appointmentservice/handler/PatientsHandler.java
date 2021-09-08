@@ -8,4 +8,5 @@ public interface PatientsHandler {
 
     Mono<ServerResponse> fetchDoctorsAvailability(ServerRequest serverRequest);
 
+    Mono<ServerResponse> createAppointment(ServerRequest serverRequest);
 }

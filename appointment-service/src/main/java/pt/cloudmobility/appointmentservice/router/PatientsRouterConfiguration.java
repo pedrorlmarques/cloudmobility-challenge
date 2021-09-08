@@ -14,6 +14,7 @@ public class PatientsRouterConfiguration {
     public RouterFunction<ServerResponse> patientsRouter(final PatientsHandler patientsHandler) {
         return RouterFunctions.route()
                 .GET("/api/patients/doctors/availability", patientsHandler::fetchDoctorsAvailability)
+                .PATCH("/api/patients/appointments/{appointmentId}", patientsHandler::createAppointment)
                 .build();
     }
 }
