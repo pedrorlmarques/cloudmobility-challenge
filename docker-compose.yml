@@ -52,13 +52,13 @@ services:
     volumes:
       - ./user-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
   mongo1:
-    image: mongo
+    image: mongo:4.2
     command: --replSet appointmentrs --bind_ip_all
   mongo2:
-    image: mongo
+    image: mongo:4.2
     command: --replSet appointmentrs --bind_ip_all
   init-container:
-    image: mongo
+    image: mongo:4.2
     depends_on:
       - mongo1
       - mongo2
@@ -68,7 +68,7 @@ services:
   appointment-service:
     image: appointment-service
     environment:
-      - SPRING_DATA_MONGODB.URI=mongodb://localhost,mongo2/test?replicaSet=appointmentrs
+      - SPRING_DATA_MONGODB.URI=mongodb://mongo1,mongo2/test?replicaSet=appointmentrs
       - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER-URI=http://keycloak:9080/auth/realms/medical-appointment
       - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka:29092
     ports:
