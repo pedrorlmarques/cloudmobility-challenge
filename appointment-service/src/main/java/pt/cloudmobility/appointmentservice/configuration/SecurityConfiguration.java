@@ -61,7 +61,7 @@ public class SecurityConfiguration {
                 .pathMatchers("/api/doctors/**").hasAuthority(AuthoritiesConstants.DOCTOR)
                 .pathMatchers("/api/**").authenticated()
                 .pathMatchers("/actuator/health").permitAll()
-                .pathMatchers("/actuator/info").permitAll()
+                .pathMatchers("/actuator/metrics/**").permitAll()
                 .pathMatchers("/actuator/**").hasAuthority(AuthoritiesConstants.ADMIN);
 
         http.oauth2ResourceServer()
