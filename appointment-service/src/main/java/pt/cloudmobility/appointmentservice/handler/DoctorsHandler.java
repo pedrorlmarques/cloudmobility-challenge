@@ -7,4 +7,6 @@ import reactor.core.publisher.Mono;
 public interface DoctorsHandler {
 
     Mono<ServerResponse> fetchAppointments(ServerRequest serverRequest);
+
+    Mono<ServerResponse> createUnavailability(ServerRequest serverRequest);
 }

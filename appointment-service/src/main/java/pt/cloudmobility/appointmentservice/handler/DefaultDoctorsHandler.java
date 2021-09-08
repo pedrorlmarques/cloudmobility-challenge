@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import pt.cloudmobility.appointmentservice.dto.CreateUnavailabilityRequest;
 import pt.cloudmobility.appointmentservice.dto.SlotDto;
 import pt.cloudmobility.appointmentservice.security.SecurityUtils;
 import pt.cloudmobility.appointmentservice.service.ScheduleService;
@@ -34,5 +35,18 @@ public class DefaultDoctorsHandler implements DoctorsHandler {
                                                 .orElseThrow(() -> new IllegalArgumentException("endDate mandatory"))), SlotDto.class)
                         )
                 );
+    }
+
+    @Override
+    public Mono<ServerResponse> createUnavailability(ServerRequest serverRequest) {
+        return SecurityUtils
+                .getUserId()
+                .flatMap(userId -> serverRequest
+                        .bodyToMono(CreateUnavailabilityRequest.class)
+                        .flatMap(request -> this.scheduleService
+                                .blockSlots(Integer.valueOf(userId),
+                                        request.getStartDate(),
+                                        request.getEndDate())
+                        ).then(ServerResponse.noContent().build()));
     }
 }

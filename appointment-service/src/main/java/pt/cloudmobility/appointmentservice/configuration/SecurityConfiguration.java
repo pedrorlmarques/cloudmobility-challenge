@@ -12,7 +12,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
@@ -86,7 +85,6 @@ public class SecurityConfiguration {
                 .loadUser(userRequest)
                 .map(user -> {
                     Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-
                     user.getAuthorities().forEach(authority -> {
                         if (authority instanceof OidcUserAuthority) {
                             OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
@@ -102,9 +100,7 @@ public class SecurityConfiguration {
     ReactiveJwtDecoder jwtDecoder() {
         var jwtDecoder = (NimbusReactiveJwtDecoder) ReactiveJwtDecoders.fromOidcIssuerLocation(issuerUri);
         var withIssuer = JwtValidators.createDefaultWithIssuer(issuerUri);
-        var withAudience = new DelegatingOAuth2TokenValidator<>(withIssuer);
-        jwtDecoder.setJwtValidator(withAudience);
-
+        jwtDecoder.setJwtValidator(withIssuer);
         return jwtDecoder;
     }
 }
