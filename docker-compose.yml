@@ -1,12 +1,12 @@
 version: '3.8'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:6.1.2
+    image: confluentinc/cp-zookeeper:6.1.1
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
   kafka:
-    image: confluentinc/cp-kafka:6.1.2
+    image: confluentinc/cp-kafka:6.1.1
     ports:
       - "9092:9092"
     environment:
@@ -20,6 +20,7 @@ services:
       - zookeeper
   keycloak:
     image: jboss/keycloak:15.0.2
+    container_name: keycloak
     command:
       [
           '-b',
@@ -37,12 +38,10 @@ services:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
       - DB_VENDOR=h2
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
     ports:
-      - "127.0.0.1:9080:9080"
-      - "127.0.0.1:9443:9443"
-      - "127.0.0.1:10990:10990"
+      - "9080:9080"
+      - "9443:9443"
+      - "10990:10990"
   user-postgresql:
     image: postgres:12.3
     environment:
@@ -52,14 +51,54 @@ services:
       - "5432:5432"
     volumes:
       - ./user-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
-  mongo-transaction:
-    image: mongo:4.2.6
-    container_name: mongo-appointment
-    environment:
-      - MONGO_INITDB_DATABASE=appointmentdb
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=example
-    ports:
-      - "27017:27017"
+  mongo1:
+    image: mongo
+    command: --replSet appointmentrs --bind_ip_all
+  mongo2:
+    image: mongo
+    command: --replSet appointmentrs --bind_ip_all
+  init-container:
+    image: mongo
+    depends_on:
+      - mongo1
+      - mongo2
     volumes:
-      - ./appointment-service/src/main/resources/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./rs:/rs
+    command: ./rs/init.sh
+  appointment-service:
+    image: appointment-service
+    environment:
+      - SPRING_DATA_MONGODB.URI=mongodb://localhost,mongo2/test?replicaSet=appointmentrs
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER-URI=http://keycloak:9080/auth/realms/medical-appointment
+      - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka:29092
+    ports:
+      - "8083:8083"
+    restart: on-failure
+    depends_on:
+      - mongo1
+      - mongo2
+      - kafka
+      - keycloak
+  idp-manager-service:
+    image: idp-manager-service
+    environment:
+      - KEYCLOAK_SERVERURL=http://keycloak:9080/auth
+      - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka:29092
+    ports:
+      - "8082:8082"
+    restart: on-failure
+    depends_on:
+      - keycloak
+      - kafka
+  user-service:
+    image: user-service
+    environment:
+      - KEYCLOAK_SERVERURL=http://keycloak:9080/auth
+      - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka:29092
+      - SPRING_R2DBC_URL=r2dbc:postgresql://user-postgresql:5432
+    ports:
+      - "8081:8081"
+    restart: on-failure
+    depends_on:
+      - user-postgresql
+      - keycloak
