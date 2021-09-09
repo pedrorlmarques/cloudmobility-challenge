@@ -170,8 +170,8 @@ docker-compose up
 
 ### Remark
 
-Until the keycloak service doesn't fully initialize the services that depend on will restart until they are able to
-start with success.
+Until the keycloak service doesn't fully initialize the services that depend on keycloak will restart until they are
+able to start with success.
 
 To stop the application, run the following command
 
@@ -264,10 +264,71 @@ PATCH localhost:8083/api/patients/appointments/{slotId}
 - Postgresql 12.3
 - Docker
 - Project Reactor 3.4.9
+- Testcontainers
 
 ## Documentation
 
 The documentation for each service can be found on each service project.
+
+## Optimizations
+
+### Keycloak
+
+Due to the limitation of keycloak we had to create the hostname, if I had more time I would switch the Idp.
+
+### Controller Advice
+
+Since we are using functional endpoints to define the rest apis this will not be applied because of this issue
+https://github.com/zalando/problem-spring-web/issues/438
+
+I can change the controller to use the imperative style even if all my code is on functional style.
+
+Example
+
+```java
+
+@RestController
+@RequestMapping(value = "/api/patients")
+public class SchedulerController {
+
+    @GetMapping
+    @ResponseStatus(code = CREATED)
+    public Flux<SlotDto> fetchAll() {
+
+    }
+}
+```
+
+Nevertheless, there is an integration test that proves that my implementation is working for non-functional endpoints.
+
+### Api Gateway
+
+- The first idea was to create a gateway in between all the services but with the lack of time, it wasn't possible.
+- Basically, the idea was to have a gateway that receives the request and forward them to the specific backend service.
+- For the PATCH methods **createAppointment** and **createUnavailability** having the gateway we can transform these
+  requests into an async requests to the appointment-service using Kafka in between. This would increase the
+  availability.
+
+### Appointment service
+
+- When I finished the development I thought on divide the appointment service into 2 services and apply the CQRS
+  pattern.
+- With this change, this will allow the read and writes workloads to scale independently also we could optimize data
+  schemas for a specific use case.
+
+### Metrics
+
+The current services have the default metrics from the spring actuator if I had more time I wanted to create a custom
+metric to monitor the number of appointments canceled, the number of appointments that didn't have any booking etc..
+
+### What could go wrong this architecture ?
+
+- When creating the user on the user-service, this service will send the domain event.
+- If the idp-manager-service is not able to process the event so the user is not able to login into appointment-service.
+- (keycloak is down or idp-manager-service is down)
+- Nevertheless, once the idp-manager-service is ok, resetting the consumer offsets will unblock.
+- At the end of the day we should create a schedule to delete the open slots that no one booked to not store unnecessary
+  data.
 
 ## Authors
 
