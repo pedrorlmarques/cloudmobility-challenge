@@ -12,6 +12,7 @@ import pt.cloudmobility.appointmentservice.MongoDBContainerTestingSupport;
 import pt.cloudmobility.appointmentservice.configuration.TestSecurityConfiguration;
 import pt.cloudmobility.appointmentservice.domain.Slot;
 import pt.cloudmobility.appointmentservice.domain.SlotStatus;
+import pt.cloudmobility.appointmentservice.error.BadRequestException;
 import pt.cloudmobility.appointmentservice.repository.SlotRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,6 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport, Mong
 
     @Autowired
     private SlotRepository slotRepository;
-
 
     @AfterEach
     void deleteDatabase() {
@@ -189,7 +189,7 @@ class DefaultScheduleServiceITTest implements KafkaContainerTestingSupport, Mong
         //verify response
         StepVerifier.create(this.defaultScheduleService.reserveSlot("123", 1))
                 .expectSubscription()
-                .expectError(IllegalAccessException.class)
+                .expectError(BadRequestException.class)
                 .verify();
 
     }

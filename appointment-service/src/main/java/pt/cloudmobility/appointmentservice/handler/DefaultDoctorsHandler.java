@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import pt.cloudmobility.appointmentservice.dto.CreateUnavailabilityRequest;
 import pt.cloudmobility.appointmentservice.dto.SlotDto;
+import pt.cloudmobility.appointmentservice.error.BadRequestException;
 import pt.cloudmobility.appointmentservice.security.SecurityUtils;
 import pt.cloudmobility.appointmentservice.service.ScheduleService;
 import reactor.core.publisher.Mono;
@@ -27,12 +28,15 @@ public class DefaultDoctorsHandler implements DoctorsHandler {
                 .getUserId()
                 .flatMap(userId -> ServerResponse.ok().body(BodyInserters
                                 .fromProducer(this.scheduleService.fetchAppointments(Integer.valueOf(userId),
-                                        serverRequest.queryParam("startDate")
-                                                .map(LocalDateTime::parse)
-                                                .orElseThrow(() -> new IllegalArgumentException("startDate mandatory")),
-                                        serverRequest.queryParam("endDate")
-                                                .map(LocalDateTime::parse)
-                                                .orElseThrow(() -> new IllegalArgumentException("endDate mandatory"))), SlotDto.class)
+                                                serverRequest.queryParam("startDate")
+                                                        .map(LocalDateTime::parse)
+                                                        .orElseThrow(() ->
+                                                                new BadRequestException("startDate mandatory", DefaultDoctorsHandler.class.getSimpleName(), "validation")),
+                                                serverRequest.queryParam("endDate")
+                                                        .map(LocalDateTime::parse)
+                                                        .orElseThrow(() ->
+                                                                new BadRequestException("endDate mandatory", DefaultDoctorsHandler.class.getSimpleName(), "validation"))
+                                        ), SlotDto.class)
                         )
                 );
     }

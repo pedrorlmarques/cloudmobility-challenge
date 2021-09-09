@@ -3,6 +3,7 @@ package pt.cloudmobility.appointmentservice.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -26,6 +27,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.savedrequest.NoOpServerRequestCache;
 import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
+import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport;
 import pt.cloudmobility.appointmentservice.security.AuthoritiesConstants;
 import pt.cloudmobility.appointmentservice.security.SecurityUtils;
 import pt.cloudmobility.appointmentservice.security.oauth2.JwtGrantedAuthorityConverter;
@@ -37,24 +39,40 @@ import java.util.Set;
 import static org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers;
 
 @Configuration
+@Import(SecurityProblemSupport.class)
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
+
+    private final SecurityProblemSupport problemSupport;
 
     @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
     private String issuerUri;
 
+    public SecurityConfiguration(SecurityProblemSupport problemSupport) {
+        this.problemSupport = problemSupport;
+    }
+
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         // @formatter:off
-        http
-                .securityMatcher(new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(
-                        pathMatchers("/swagger-ui.html/**", "/configuration/**", "/swagger-resources/**", "/v2/api-docs", "/webjars/**", "/test/**", "/v3/api-docs/**"),
+        http.securityMatcher(new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(
+                        pathMatchers("/swagger-ui.html/**",
+                                "/configuration/**",
+                                "/swagger-resources/**",
+                                "/v2/api-docs",
+                                "/webjars/**",
+                                "/test/**",
+                                "/v3/api-docs/**"),
                         pathMatchers(HttpMethod.OPTIONS, "/**")
                 )))
                 .csrf()
                 .disable()
                 .requestCache()
                 .requestCache(NoOpServerRequestCache.getInstance())
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(problemSupport)
+                .accessDeniedHandler(problemSupport)
                 .and()
                 .authorizeExchange()
                 .pathMatchers("/api/patients/**").hasAuthority(AuthoritiesConstants.USER)

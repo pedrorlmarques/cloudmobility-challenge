@@ -25,6 +25,7 @@
         <testcontainers.version>1.15.3</testcontainers.version>
         <jib-maven-plugin.version>3.1.4</jib-maven-plugin.version>
         <springdoc-openapi.version>1.5.10</springdoc-openapi.version>
+        <problem-spring-webflux.version>0.26.2</problem-spring-webflux.version>
     </properties>
 
     <repositories>

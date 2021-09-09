@@ -6,6 +6,7 @@ import pt.cloudmobility.appointmentservice.configuration.AppointmentProperties;
 import pt.cloudmobility.appointmentservice.domain.Slot;
 import pt.cloudmobility.appointmentservice.domain.SlotStatus;
 import pt.cloudmobility.appointmentservice.dto.SlotDto;
+import pt.cloudmobility.appointmentservice.error.BadRequestException;
 import pt.cloudmobility.appointmentservice.mapper.SlotMapper;
 import pt.cloudmobility.appointmentservice.repository.SlotRepository;
 import pt.cloudmobility.appointmentservice.utils.ScheduleUtils;
@@ -67,7 +68,7 @@ public class DefaultScheduleService implements ScheduleService {
     public Mono<Void> reserveSlot(String slotId, Integer userId) {
         return Mono.justOrEmpty(slotId)
                 .flatMap(this.slotRepository::findById)
-                .switchIfEmpty(Mono.error(new IllegalAccessException("Slot doesn't exist")))
+                .switchIfEmpty(Mono.error(new BadRequestException("Slot doesn't exist", DefaultScheduleService.class.getSimpleName(), "validation")))
                 .flatMap(verifyIfSlotIsAvailable())
                 .flatMap(slot -> updateSlot(userId, slot, SlotStatus.BOOKED))
                 .then();
@@ -76,7 +77,7 @@ public class DefaultScheduleService implements ScheduleService {
     private Function<Slot, Mono<? extends Slot>> verifyIfSlotIsAvailable() {
         return slot -> {
             if (!slot.getStatus().equals(SlotStatus.OPEN)) {
-                return Mono.error(new IllegalAccessException("Slot is unavailable"));
+                return Mono.error(new BadRequestException("Slot is unavailable", DefaultScheduleService.class.getSimpleName(), "validation"));
             } else {
                 return Mono.justOrEmpty(slot);
             }
