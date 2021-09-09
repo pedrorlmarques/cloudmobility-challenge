@@ -9,6 +9,7 @@ import pt.cloudmobility.userservice.domain.User;
 import pt.cloudmobility.userservice.dto.EventType;
 import pt.cloudmobility.userservice.dto.UserDto;
 import pt.cloudmobility.userservice.dto.UserEvent;
+import pt.cloudmobility.userservice.error.BadRequestException;
 import pt.cloudmobility.userservice.repository.UserRepository;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -94,7 +95,7 @@ class DefaultUserServiceTest {
         StepVerifier.create(
                         this.userService.createUser(userToCreate, userCreationCallback))
                 .expectSubscription()
-                .expectError(IllegalStateException.class)
+                .expectError(BadRequestException.class)
                 .verify();
 
         verify(this.userEventSink, times(0)).emitNext(any(), any());
