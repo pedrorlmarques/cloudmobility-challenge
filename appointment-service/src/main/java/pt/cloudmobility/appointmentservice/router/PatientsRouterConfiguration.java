@@ -32,7 +32,7 @@ public class PatientsRouterConfiguration {
             @RouterOperation(path = "/api/patients/appointments/{appointmentId}",
                     beanClass = PatientsHandler.class, beanMethod = "createAppointment",
                     operation =
-                    @Operation(operationId = "createUnavailability", summary = "createUnavailability", tags = {"Patients API"},
+                    @Operation(operationId = "createAppointment", summary = "createAppointment", tags = {"Patients API"},
                             parameters = {
                                     @Parameter(in = ParameterIn.PATH, name = "appointmentId", description = "appointmentId", schema = @Schema(implementation = String.class))
                             },
